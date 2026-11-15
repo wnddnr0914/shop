@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>심플옷장 - 간단 쇼핑몰</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --text: #1c1c1e;
+    --muted: #767680;
+    --accent: #3182f6;
+    --border: #e5e5ea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header h1 { font-size: 20px; margin: 0; }
+  #cart-toggle {
+    position: relative;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  #cart-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ff3b30;
+    color: white;
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 1px 6px;
+  }
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .product {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .product .thumb {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    background: #eef1f5;
+  }
+  .product .info { padding: 12px 14px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .product .name { font-weight: 600; font-size: 14px; }
+  .product .price { color: var(--muted); font-size: 13px; }
+  .product button {
+    margin-top: auto;
+    background: var(--text);
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #cart-panel {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 340px;
+    height: 100%;
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    box-shadow: -4px 0 16px rgba(0,0,0,0.08);
+    transition: right 0.25s ease;
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 20;
+  }
+  #cart-panel.open { right: 0; }
+  #cart-panel h2 { margin-top: 0; font-size: 18px; }
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .cart-item .qty-btns button {
+    border: 1px solid var(--border);
+    background: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  #cart-total {
+    margin-top: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+  }
+  #pay-btn {
+    width: 100%;
+    margin-top: 16px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #pay-btn:disabled { background: #c7d8f5; cursor: not-allowed; }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    display: none;
+    z-index: 15;
+  }
+  #overlay.open { display: block; }
+  #empty-cart { color: var(--muted); font-size: 14px; text-align: center; margin-top: 40px; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛍️ 심플옷장</h1>
+  <button id="cart-toggle">
+    장바구니 <span id="cart-count">0</span>
+  </button>
+</header>
+
+<main>
+  <div class="grid" id="product-grid"></div>
+</main>
+
+<footer>TossPayments 결제위젯 연동 데모 · 테스트 결제 전용 (실결제 불가)</footer>
+
+<div id="overlay"></div>
+<div id="cart-panel">
+  <h2>장바구니</h2>
+  <div id="cart-items"></div>
+  <div id="empty-cart">장바구니가 비어있어요.</div>
+  <div id="cart-total">
+    <span>총 금액</span>
+    <span id="total-amount">0원</span>
+  </div>
+  <button id="pay-btn" disabled>결제하기</button>
+
+  <div id="payment-method" style="margin-top:16px;"></div>
+  <div id="agreement" style="margin-top:12px;"></div>
+</div>
+
+<script src="https://js.tosspayments.com/v2/standard"></script>
+<script src="app.js?v=4"></script>
+</body>
+</html>
